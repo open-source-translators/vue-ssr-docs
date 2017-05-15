@@ -1,6 +1,6 @@
 # CSS の管理
 
-The recommended way to manage CSS is to simply use `<style></style>` inside `*.vue` single file components, which offers:
+CSS を管理するためのおすすめの方法は、シンプルに単一ファイルコンポーネントである `*.vue` の中で `<style></style>`を使うことです。これは以下を提供します:
 
 - 関連するコンポーネントのスコープ付き CSS
 - プリプロセッサや PostCSS を活用する機能
@@ -11,7 +11,7 @@ The recommended way to manage CSS is to simply use `<style></style>` inside `*.v
 - クライアントとサーバーのための一般的な変換
 -  `bundleRenderer` を使用した時の自動的なCSS評価
 
-  If used during a server render, a component's CSS can be collected and inlined in the HTML (automatically handled when using `template` option). On the client, when the component is used for the first time, `vue-style-loader` will check if there is already server-inlined CSS for this component - if not, the CSS will be dynamically injected via a `<style></style>` tag.
+もしサーバレンダリングで使用するなら、コンポーネントの CSS はHTMLに集められてインライン化されます ( `template` オプションを使用していれば自動で扱われます ) 。クライアント上で、コンポーネントが初めて使用されたとき、`vue-style-loader` は既にそのコンポーネントにサーバーインラインCSSがあるかチェックします。もし存在しない場合、そのCSSは動的に `<style></style>` タグ経由で注入されます。
 
 - 共通する CSS の抽出
 
