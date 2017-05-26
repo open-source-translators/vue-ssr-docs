@@ -2,13 +2,13 @@
 
 ## データストア
 
-During SSR, we are essentially rendering a "snapshot" of our app, so if the app relies on some asynchronous data, **these data need to be pre-fetched and resolved before we start the rendering process**.
+SSR をしているとき、基本的にはアプリケーションの「スナップショット」をレンダリングしています、したがって、アプリケーションがいくつかの非同期データに依存している場合においては、**それらのデータを、レンダリング処理を開始する前にプリフェッチして解決する必要があります**。
 
-Another concern is that on the client, the same data needs to be available before we mount the client side app - otherwise the client app would render using different state and the hydration would fail.
+もうひとつの重要なことは、クライアントサイドでアプリケーションがマウとされる前に、クライアントサイドで同じデータを利用可能である必要があるということです。そうしないと、クライアントサイドが異なるステートを用いてレンダリングしてしまい、ハイドレーションが失敗してしまいます。
 
-To address this, the fetched data needs to live outside the view components, in a dedicated data store, or a "state container". On the server, we can pre-fetch and fill data into the store before rendering. In addition, we will serialize and inline the state in the HTML. The client-side store can directly pick up the inlined state before we mount the app.
+この問題に対応するため、フェッチされたデータはビューコンポーネントの外でも存続している必要があります。つまり特定の用途のデータストアもしくは "ステート・コンテナ" に入っている必要があります。サーバーサイドではレンダリングする前にデータをプリフェッチしてストアの中に入れることができます。さらにシリアライズして HMTL にステートを埋め込みます。クライアントサイドのストアは、アプリケーションをマウントする前に、埋め込まれたステートを直接取得できます。
 
-We will be using the official state management library [Vuex](https://github.com/vuejs/vuex/) for this purpose. Let's create a `store.js` file, with some mocked logic for fetching an item based on an id:
+このような用途として、公式のステート管理ライブラリである [Vuex](https://github.com/vuejs/vuex/) を使っています。では `store.js` ファイルをつくって、そこに id に基づく item を取得するコードを書いてみましょう:
 
 ```js
 // store.js
@@ -41,7 +41,7 @@ export function createStore () {
 }
 ```
 
-And update `app.js`:
+そして `app.js` を更新します:
 
 ```js
 // app.js
@@ -67,13 +67,13 @@ export function createApp () {
 }
 ```
 
-## Logic Collocation with Components
+## ロジックとコンポーネントとの結び付き
 
-So, where do we place the code that dispatches the data-fetching actions?
+ではデータをプリフェッチするアクションをディスパッチするコードはどこに書けばよいでしょうか？
 
-The data we need to fetch is determined by the route visited - which also determines what components are rendered. In fact, the data needed for a given route is also the data needed by the components rendered at that route. So it would be natural to place the data fetching logic inside route components.
+フェッチする必要があるデータはアクセスしたルートによって決まります。またそのルートによってどのコンポーネントがレンダリングされるかも決まります。実のところ、与えられたルートに必要とされるデータは、そのルートでレンダリングされるコンポーネントに必要とされるデータでもあるのです。したがって、データをフェッチするロジックはルートコンポーネントの中に書くのが自然でしょう。
 
-We will expose a custom static function `asyncData` on our route components. Note because this function will be called before the components are instantiated, it doesn't have access to `this`. The store and route information needs to be passed in as arguments:
+ルートコンポーネントではカスタム静的関数 `asyncData` が利用可能です。この関数はそのルートコンポーネントがインスタンス化される前に呼び出されるため `this` にアクセスできないことを覚えておいてください。ストアとルートの情報は引数として渡される必要があります:
 
 ```html
 <!-- Item.vue -->
@@ -96,9 +96,9 @@ export default {
 </script>
 ```
 
-## Server Data Fetching
+## サーバーサイドのデータ取得
 
-In `entry-server.js` we can get the components matched by a route with `router.getMatchedComponents()`, and call `asyncData` if the component exposes it. Then we need to attach resolved state to the render context.
+`entry-server.js` において `router.getMatchedComponents()` を使ってルートにマッチしたコンポーネントを取得できます。そしてコンポーネントが `asyncData` を利用可能にしていればそれを呼び出すことができます。そしてレンダリングのコンテキストに解決したステートを付属させる必要があります。
 
 ```js
 // entry-server.js
@@ -134,7 +134,7 @@ export default context => {
 }
 ```
 
-When using `template`, `context.state` will automatically be embedded in the final HTML as `window.__INITIAL__` state. On the client, the store should pick up the state before mounting the application:
+`template` を使うと `context.state` は自動的に最終的な HTML に `window.__INITIAL__` というかたちのステートとして埋め込まれます。クライアントサイドでは、アプリケーションがマウントされる前に、ストアがそのステートを取得します:
 
 ```js
 // entry-client.js
@@ -144,15 +144,15 @@ if (window.__INITIAL_STATE__) {
 }
 ```
 
-## Client Data Fetching
+## クライアントサイドのデータ取得
 
-On the client, there are two different approaches for handling data fetching:
+クライアントサイドではデータ取得について 2つの異なるアプローチがあります:
 
-1. **Resolve data before route navigation:**
+1. **ルートのナビゲーションの前にデータを解決する:**
 
-  With this strategy, the app will stay on the current view until the data needed by the incoming view has been resolved. The benefit is that the incoming view can directly render the full content when it's ready, but if the data fetching takes a long time, the user will feel "stuck" on the current view. It is therefore recommended to provide a data loading indicator if using this strategy.
+この方法では、アプリケーションは、遷移先のビューが必要とするデータが解決されるまで、現在のビューを保ちます。良い点は遷移先のビューがデータの準備が整い次第、フルの内容をダイレクトにレンダリングできることです。しかしながら、データの取得に時間がかかるときは、ユーザーは現在のビューで「固まってしまった」と感じてしまうでしょう。そのため、この方法を用いるときにはローディング・インジケーターを表示させることが推奨されます。
 
-  We can implement this strategy on the client by checking matched components and invoking their `asyncData` function inside a global route hook. Note we should register this hook after the initial route is ready so that we don't unnecessarily fetch the server-fetched data again.
+この方法は、クライアントサイドでマッチするコンポーネントをチェックし、グローバルなルートのフック内で `asyncData` 関数を実行することにより実装できます。重要なことは、このフックは初期ルートが ready になった後に登録するということです。そうすれば、サーバーサイドで取得したデータをもう一度無駄に取得せずに済みます。
 
 ```js
   // entry-client.js
@@ -188,11 +188,11 @@ On the client, there are two different approaches for handling data fetching:
   })
 ```
 
-1. **Fetch data after the matched view is rendered:**
+1. **マッチするビューがレンダリングされた後にデータを取得する:**
 
-  This strategy places the client-side data-fetching logic in a view component's `beforeMount` function. This allows the views to switch instantly when a route navigation is triggered, so the app feels a bit more responsive. However, the incoming view will not have the full data available when it's rendered. It is therefore necessary to have a conditional loading state for each view component that uses this strategy.
+この方法ではビューコンポーネントの `beforeMount` 関数内にクライアントサイドでデータを取得するロジックを置きます。こうすればルートのナビゲーションが発火したらすぐにビューを切り替えられます。そうすればアプリケーションはよりレスポンスが良いと感じられるでしょう。しかしながら、遷移先のビューはレンダリングした時点ではフルのデータを持っていません。したがって、この方法を使うコンポーネントの各々がローディング中か否かの状態を持つ必要があります。
 
-  This can be achieved with a client-only global mixin:
+この方法はクライアントサイド限定のグローバルな mixin で実装できます:
 
 ```js
   Vue.mixin({
@@ -211,7 +211,7 @@ On the client, there are two different approaches for handling data fetching:
   })
 ```
 
-The two strategies are ultimately different UX decisions and should be picked based on the actual scenario of the app you are building. But regardless of which strategy you pick, the `asyncData` function should also be called when a route component is reused (same route, but params or query changed. e.g. from `user/1` to `user/2`). We can also handle this with a client-only global mixin:
+これら 2つの方法のどちらを選ぶかは、究極的には異なる UX のどちらを選ぶかの判断であり、構築しようとしているアプリケーションの実際のシナリオに基づいて選択されるべきものです。しかし、どちらの方法を選択したかにかかわらず、ルートコンポーネントが再利用されたとき（つまりルートは同じだがパラメーターやクエリが変わったとき。例えば `user/1` から `user/2`) へ変わったとき）には `asyncData` 関数は呼び出されるようにすべきです。これはクライアントサイド限定のグローバルな mixin でハンドリングできます:
 
 ```js
 Vue.mixin({
@@ -231,4 +231,4 @@ Vue.mixin({
 
 ---
 
-Phew, that was a lot of code! This is because universal data-fetching is probably the most complex problem in a server-rendered app and we are laying the groundwork for easier further development. Once the boilerplate is set up, authoring individual components will be actually quite pleasant.
+ふぅ、コードが長いですね。これはどうしてかというと、ユニバーサルなデータ取得は、大抵の場合、サーバーサイドでレンダリングするアプリケーションの最も複雑な問題であり、また、今後、スムーズに開発を進めていくための下準備をしているためです。一旦ひな形が準備できてしまえば、あとは、それぞれのコンポーネントを記述していく作業は、実際のところ実に楽しいものになるはずです。
