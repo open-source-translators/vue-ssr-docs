@@ -15,8 +15,8 @@ SSR をしているとき、基本的にはアプリケーションの「スナ�
 import Vue from 'vue'
 import Vuex from 'vuex'
 Vue.use(Vuex)
-// Assume we have a universal API that returns Promises
-// and ignore the implementation details
+// Promise を返すユニバーサルなアプリケーションを想定しています
+// また、実装の詳細は割愛します
 import { fetchItem } from './api'
 export function createStore () {
   return new Vuex.Store({
@@ -25,8 +25,8 @@ export function createStore () {
     },
     actions: {
       fetchItem ({ commit }, id) {
-        // return the Promise via store.dispatch() so that we know
-        // when the data has been fetched
+        // store.dispatch() を使って Promise を返します
+        // そうすればデータがフェッチされたときにそれを知ることができます
         return fetchItem(id).then(item => {
           commit('setItem', { id, item })
         })
@@ -51,27 +51,27 @@ import { createRouter } from './router'
 import { createStore } from './store'
 import { sync } from 'vuex-router-sync'
 export function createApp () {
-  // create router and store instances
+  // ルーターとストアのインスタンスを作成します
   const router = createRouter()
   const store = createStore()
-  // sync so that route state is available as part of the store
+  // ルートのステートをストアの一部として利用できるよう同期します
   sync(store, router)
-  // create the app instance, injecting both the router and the store
+  // アプリケーションのインスタンスを作成し、ルーターとストアの両方を挿入します
   const app = new Vue({
     router,
     store,
     render: h => h(App)
   })
-  // expose the app, the router and the store.
+  // アプリケーション、ルーター、ストアを露出します
   return { app, router, store }
 }
 ```
 
 ## ロジックとコンポーネントとの結び付き
 
-ではデータをプリフェッチするアクションをディスパッチするコードはどこに書けばよいでしょうか？
+ではデータをプリフェッチするアクションをディスパッチするコードはどこに置けばよいでしょうか？
 
-フェッチする必要があるデータはアクセスしたルートによって決まります。またそのルートによってどのコンポーネントがレンダリングされるかも決まります。実のところ、与えられたルートに必要とされるデータは、そのルートでレンダリングされるコンポーネントに必要とされるデータでもあるのです。したがって、データをフェッチするロジックはルートコンポーネントの中に書くのが自然でしょう。
+フェッチする必要があるデータはアクセスしたルートによって決まります。またそのルートによってどのコンポーネントがレンダリングされるかも決まります。実のところ、与えられたルートに必要とされるデータは、そのルートでレンダリングされるコンポーネントに必要とされるデータでもあるのです。したがって、データをフェッチするロジックはルートコンポーネントの中に置くのが自然でしょう。
 
 ルートコンポーネントではカスタム静的関数 `asyncData` が利用可能です。この関数はそのルートコンポーネントがインスタンス化される前に呼び出されるため `this` にアクセスできないことを覚えておいてください。ストアとルートの情報は引数として渡される必要があります:
 
@@ -83,11 +83,11 @@ export function createApp () {
 <script>
 export default {
   asyncData ({ store, route }) {
-    // return the Promise from the action
+    // アクションから Promise が返されます
     return store.dispatch('fetchItem', route.params.id)
   },
   computed: {
-    // display the item from store state.
+    // ストアのステートから item を表示します
     items () {
       return this.$store.state.items[this.$route.params.id]
     }
@@ -112,7 +112,7 @@ export default context => {
       if (!matchedComponents.length) {
         reject({ code: 404 })
       }
-      // call asyncData() on all matched route components
+      // マッチしたルートコンポーネントすべての asyncData() を呼び出します 
       Promise.all(matchedComponents.map(Component => {
         if (Component.asyncData) {
           return Component.asyncData({
@@ -121,11 +121,10 @@ export default context => {
           })
         }
       })).then(() => {
-        // After all preFetch hooks are resolved, our store is now
-        // filled with the state needed to render the app.
-        // When we attach the state to the context, and the `template` option
-        // is used for the renderer, the state will automatically be
-        // serialized and injected into the HTML as window.__INITIAL_STATE__.
+        // すべてのプリフェッチのフックが解決されると、ストアには、
+        // アプリケーションをレンダリングするために必要とされるステートが入っています。
+        // ステートを context に付随させ、`template` オプションがレンダラーに利用されると、
+        // ステートは自動的にシリアライズされ、HTML 内に `window.__INITIAL_STATE__` として埋め込まれます
         context.state = store.state
         resolve(app)
       }).catch(reject)
@@ -156,17 +155,16 @@ if (window.__INITIAL_STATE__) {
 
 ```js
   // entry-client.js
-  // ...omitting unrelated code
+  // 関係のないコードは除外します
   router.onReady(() => {
-    // Add router hook for handling asyncData.
-    // Doing it after initial route is resolved so that we don't double-fetch
-    // the data that we already have. Using router.beforeResolve() so that all
-    // async components are resolved.
+    // asyncData を扱うためにルーターのフックを追加します。これは初期ルートが解決された後に実行します
+    // そうすれば（訳注: サーバーサイドで取得したために）既に持っているデータを冗長に取得しなくて済みます
+    // すべての非同期なコンポーネントが解決されるように router.beforeResolve() を使います
     router.beforeResolve((to, from, next) => {
       const matched = router.getMatchedComponents(to)
       const prevMatched = router.getMatchedComponents(from)
-      // we only care about none-previously-rendered components,
-      // so we compare them until the two matched lists differ
+      // まだレンダリングされていないコンポーネントにのみ関心を払うため、
+      // 2つのマッチしたリストに差分が表れるまで、コンポーネントを比較します
       let diffed = false
       const activated = matched.filter((c, i) => {
         return diffed || (diffed = (prevMatched[i] !== c))
@@ -174,13 +172,14 @@ if (window.__INITIAL_STATE__) {
       if (!activated.length) {
         return next()
       }
-      // this is where we should trigger a loading indicator if there is one
+      // もしローディングインジケーターがあるならば、
+      // この箇所がローディングインジケーターを発火させるべき箇所です
       Promise.all(activated.map(c => {
         if (c.asyncData) {
           return c.asyncData({ store, route: to })
         }
       })).then(() => {
-        // stop loading indicator
+        // ローディングインジケーターを停止させます
         next()
       }).catch(next)
     })
@@ -199,9 +198,8 @@ if (window.__INITIAL_STATE__) {
     beforeMount () {
       const { asyncData } = this.$options
       if (asyncData) {
-        // assign the fetch operation to a promise
-        // so that in components we can do `this.dataPromise.then(...)` to
-        // perform other tasks after data is ready
+        // データが準備できた後に、コンポーネント内で `this.dataPromise.then(...)` して
+        // 他のタスクを実行できるようにするため、Promise にフェッチ処理を割り当てます
         this.dataPromise = asyncData({
           store: this.$store,
           route: this.$route
