@@ -50,7 +50,7 @@ Vue インスタンスを Node.js のストリームへ描画します。context
 
 - #### `template`
 
-  Provide a template for the entire page's HTML. The template should contain a comment `<!--vue-ssr-outlet-->` which serves as the placeholder for rendered app content.
+ページ全体の HTML を表すテンプレートを設定します。描画されたアプリケーションの内容を指し示すプレースホルダの代わりになるコメント文 `<!--vue-ssr-outlet-->`をテンプレートには含むべきです。
 
 テンプレートは、次の構文を使用した簡単な補間もサポートします。
 
