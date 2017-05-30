@@ -72,7 +72,7 @@ Renderer に `inject: false` も渡すことで、すべての自動挿入を無
 
 参照：
 
-- [Using a Page Template](./basic.md#using-a-page-template)
+- [ページテンプレートの使用](./basic.md#using-a-page-template)
 - [手動によるアセット挿入](./build-config.md#manual-asset-injection)
     - #### `clientManifest`
 - 2.3.0以上
