@@ -26,7 +26,7 @@ const renderer = createBundleRenderer(serverBundle, { ... })
 
 より詳しい情報は、 [サーババンドルの紹介](./bundle-renderer.md) と [ビルド設定](./build-config.md) の項目を参照してください。
 
-## `Renderer クラス`
+## `クラス: Renderer`
 
 - #### `renderer.renderToString(vm[, context], callback)`
 
@@ -36,7 +36,7 @@ Vue インスタンスを文字列として描画します。context オブジ�
 
 Vue インスタンスを Node.js のストリームへ描画します。context オブジェクトの指定は任意です。より詳しい情報は、[ストリーミング](./streaming.md) の項目を参照してください。
 
-## `BundleRenderer クラス`
+## `クラス: BundleRenderer`
 
 - #### `bundleRenderer.renderToString([context, ]callback)`
 
@@ -73,7 +73,7 @@ Renderer に `inject: false` も渡すことで、すべての自動挿入を無
 参照：
 
 - [ページテンプレートの使用](./basic.md#using-a-page-template)
-- [手動によるアセット挿入](./build-config.md#manual-asset-injection)
+- [手動によるアセットインジェクション](./build-config.md#manual-asset-injection)
     - #### `clientManifest`
 - 2.3.0以上
 - `createBundleRenderer` メソッド内でのみ使用可能
@@ -87,7 +87,7 @@ Renderer に `inject: false` も渡すことで、すべての自動挿入を無
 
  `template` 使用時に、自動挿入を行うかどうかを制御します。デフォルトは `true` です。
 
-参考：[手動によるアセット挿入](./build-config.md#manual-asset-injection)
+参考：[手動によるアセットインジェクション](./build-config.md#manual-asset-injection)
 
 - 
 #### `shouldPreload`
