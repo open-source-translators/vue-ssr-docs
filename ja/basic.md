@@ -1,4 +1,4 @@
-# Basic Usage
+# 基本的な使い方
 
 ## インストール
 
@@ -6,9 +6,9 @@
 npm install vue vue-server-renderer --save
 ```
 
-We will be using NPM throughout the guide, but feel free to use [Yarn](https://yarnpkg.com/en/) instead.
+このガイドでは NPM を使って説明していきますが [Yarn](https://yarnpkg.com/en/) でも大丈夫です。
 
-#### Notes
+#### 注意
 
 - It's recommended to use Node.js version 6+.
 - `vue-server-renderer` and `vue` must have matching versions.
@@ -32,7 +32,7 @@ renderer.renderToString(app, (err, html) => {
 })
 ```
 
-## Integrating with a Server
+## サーバと連携する
 
 It is pretty straightforward when used inside a Node.js server, for example [Express](https://expressjs.com/):
 
@@ -70,7 +70,7 @@ server.get('*', (req, res) => {
 server.listen(8080)
 ```
 
-## Using a Page Template
+## ページテンプレートを使用する
 
 When you render a Vue app, the renderer only generates the markup of the app. In the example we had to wrap the output with an extra HTML page shell.
 
