@@ -10,21 +10,21 @@ npm install vue vue-server-renderer --save
 
 #### 注意
 
-- It's recommended to use Node.js version 6+.
-- `vue-server-renderer` and `vue` must have matching versions.
-- `vue-server-renderer` relies on some Node.js native modules and therefore can only be used in Node.js. We may provide a simpler build that can be run in other JavaScript runtimes in the future.
+- Node.jsのバージョンは6以上を使用することを推奨します
+- `vue-server-renderer` と `vue` のバージョンは一致している必要があります
+- `vue-server-renderer` はNode.jsのネイティブモジュールに依存しているため、Node.jsでのみ使用できます。 私たちは、将来的に他のJavaScriptランタイムで実行できるよりシンプルなビルドを提供するかもしれません。
 
-## Rendering a Vue Instance
+## Vue インスタンスをレンダリング
 
 ```js
-// Step 1: Create a Vue instance
+// ステップ 1: Vue インスタンスを作成
 const Vue = require('vue')
 const app = new Vue({
   template: `<div>Hello World</div>`
 })
-// Step 2: Create a renderer
+// ステップ 2: レンダラを作成
 const renderer = require('vue-server-renderer').createRenderer()
-// Step 3: Render the Vue instance to HTML
+// ステップ 3: Vue インスタンスをHTMLに描画
 renderer.renderToString(app, (err, html) => {
   if (err) throw err
   console.log(html)
@@ -34,7 +34,7 @@ renderer.renderToString(app, (err, html) => {
 
 ## サーバと連携する
 
-It is pretty straightforward when used inside a Node.js server, for example [Express](https://expressjs.com/):
+Node.js で作られたサーバで使う場合はとても簡単です。例えば [Express](https://expressjs.com/):
 
 ```bash
 npm install express --save
@@ -72,9 +72,9 @@ server.listen(8080)
 
 ## ページテンプレートを使用する
 
-When you render a Vue app, the renderer only generates the markup of the app. In the example we had to wrap the output with an extra HTML page shell.
+Vueアプリをレンダーする際、レンダラはアプリのマークアップのみを生成します。この例では、出力を余計なHTMLページシェルでラップする必要がありました。
 
-To simplify this, you can directly provide a page template when creating the renderer. Most of the time we will put the page template in its own file, e.g. `index.template.html`:
+これをシンプル化するために、レンダラの作成時にページテンプレートを直接提供することができます。ほとんどの場合、ページテンプレートを単独のファイルに記述します。 例 `index.template.html`:
 
 ```html
 <!DOCTYPE html>
@@ -86,9 +86,9 @@ To simplify this, you can directly provide a page template when creating the ren
 </html>
 ```
 
-Notice the `<!--vue-ssr-outlet-->` comment -- this is where your app's markup will be injected.
+`<!--vue-ssr-outlet-->` コメントに注目してみてください。 -- これはあなたのアプリケーションのマークアップが注入される場所です。
 
-We can then read and pass the file to the Vue renderer:
+ファイルを読み込みVueレンダラに渡すことができます。
 
 ```js
 const renderer = createRenderer({
@@ -99,9 +99,9 @@ renderer.renderToString(app, (err, html) => {
 })
 ```
 
-### Template Interpolation
+### テンプレート展開
 
-The template also supports simple interpolation. Given the following template:
+テンプレートはシンプルな展開にも対応しています。 次のようなテンプレートであれば：
 
 ```html
 <html>
@@ -115,7 +115,7 @@ The template also supports simple interpolation. Given the following template:
 </html>
 ```
 
-We can provide interpolation data by passing a "render context object" as the second argument to `renderToString`:
+`renderToString` の第2引数として "描画コンテキストオブジェクト"(render context object) を渡すことで展開データを提供することができます
 
 ```js
 const context = {
@@ -126,17 +126,17 @@ const context = {
   `
 }
 renderer.renderToString(app, context, (err, html) => {
-  // page title will be "hello"
-  // with meta tags injected
+  // ページタイトルは "hello" になり、
+  // メタタグが注入されます。
 })
 ```
 
-The `context` object can also be shared with the Vue app instance, allowing components to dynamically register data for template interpolation.
+`context` オブジェクトもVueアプリインスタンスと共有することができ、コンポーネントがテンプレート展開のためにデータを動的に追加することができます。
 
-In addition, the template supports some advanced features such as:
+さらに、テンプレートは次のような高度な機能をサポートしています:
 
-- Auto injection of critical CSS when using `*.vue` components;
-- Auto injection of asset links and resource hints when using `clientManifest`;
-- Auto injection and XSS prevention when embedding Vuex state for client-side hydration.
+- `*.vue` コンポーネントを使用する際の、重要なCSSの自動注入
+- `clientManifest` を使用する際の、アセットリンクとリソースヒントの自動注入
+- クライアントサイドハイドレーションのためにVuexの状態を埋め込む際にXSS防止の自動注入
 
-We will discuss these when we introduce the associated concepts later in the guide.
+関連する概念については、後でこのガイドで紹介します。
