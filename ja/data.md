@@ -25,8 +25,7 @@ export function createStore () {
     },
     actions: {
       fetchItem ({ commit }, id) {
-        // store.dispatch() を使って Promise を返します
-        // そうすればデータがフェッチされたときにそれを知ることができます
+        // store.dispatch() 経由でデータがフェッチされたときにそれを知るために、Promise を返します
         return fetchItem(id).then(item => {
           commit('setItem', { id, item })
         })
