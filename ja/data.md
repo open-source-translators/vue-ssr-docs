@@ -61,7 +61,7 @@ export function createApp () {
     store,
     render: h => h(App)
   })
-  // アプリケーション、ルーター、ストアを露出します
+  // アプリケーション、ルーター、ストアを公開します
   return { app, router, store }
 }
 ```
