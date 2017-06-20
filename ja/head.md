@@ -26,8 +26,8 @@ export function createApp (ssrContext) {
 ```js
 // title-mixin.js
 function getTitle (vm) {
-  // components can simply provide a `title` option
-  // which can be either a string or a function
+  // コンポーネントはシンプルに `title` オプションを提供し、
+  // これには文字列または関数を入れることができます
   const { title } = vm.$options
   if (title) {
     return typeof title === 'function'
