@@ -1,12 +1,12 @@
-# ソースコード戦略
+# ソースコードの構造
 
 ## ステートフルなシングルトンは避ける
 
-クライアント専用のコードを書くとき、私たちはコードが毎回新鮮なコンテキストで評価されるという事実に慣れています。しかし、 Node.js サーバーは長時間実行されるプロセスです。私たちのコードがプロセスに要求されるとき、それは一度評価されメモリにとどまります。つまりシングルトンのオブジェクトを作成したとき、それは全ての受信リクエスト間でシェアされると言うことです。
+クライアントのみのコードを書くとき、私たちはコードが毎回新しいコンテキストで評価されるという事実に慣れています。しかし、 Node.js サーバーは長時間実行されるプロセスです。私たちのコードがプロセスに要求されるとき、それは一度評価されメモリにとどまります。つまりシングルトンのオブジェクトを作成したとき、それは全ての受信リクエスト間でシェアされると言うことです。
 
-基本的な例としては、私たちは **リクエストごとに新しいルート Vue インスタンスを作成します**。それは各ユーザがそれぞれのブラウザでアプリの新鮮なインスタンスを使用することに似ています。もし私たちが複数のリクエストをまたいでインスタンスを共有すると、それは容易にクロスリクエスト状態の汚染につながるでしょう。
+基本的な例としては、私たちは **リクエストごとに新しいルート Vue インスタンスを作成します**。それは各ユーザがそれぞれのブラウザでアプリケーションの新しいインスタンスを使用することに似ています。もし私たちが複数のリクエストをまたいでインスタンスを共有すると、それは容易にクロスリクエスト状態の汚染につながるでしょう。
 
-そのため、直接アプリのインスタンスを作成するのではなく、各リクエストで繰り返し実行される新しいアプリのインスタンスを作成するファクトリ関数を公開する必要があります：
+そのため、直接アプリケーションのインスタンスを作成するのではなく、各リクエストで繰り返し実行される新しいアプリケーションのインスタンスを作成するファクトリ関数を公開する必要があります：
 
 ```js
 // app.js
@@ -16,7 +16,7 @@ module.exports = function createApp (context) {
     data: {
       url: context.url
     },
-    template: `<div data-segment-id="282501">The visited URL is: {{ url }}</div>`
+    template: `<div>The visited URL is: {{ url }}</div>`
   })
 }
 ```
@@ -30,7 +30,7 @@ server.get('*', (req, res) => {
   const context = { url: req.url }
   const app = createApp(context)
   renderer.renderToString(app, (err, html) => {
-    // handle error...
+    // エラーをハンドリングします
     res.end(html)
   })
 })
@@ -44,7 +44,7 @@ server.get('*', (req, res) => {
 
 これまでは、同じ Vue アプリケーションをクライアントへ配信する方法を論じてはいませんでした。これを行うには、webpack を使用して Vue アプリケーションをバンドルする必要があります。実際、webpack を使用して Vue アプリケーションをサーバーにバンドルしたいと思っているのはおそらく次の理由によるものです。
 
-- 典型的な Vue アプリケーションは webpack と `vue-loader` によってビルドされ、 `file-loader` 経由でのファイルのインポートや`css-loader 経由でCSSをインポートなどの多くの webpack 固有の機能は Node.jsで直接動作しないため。`
+- 典型的な Vue アプリケーションは webpack と `vue-loader` によってビルドされ、 `file-loader` 経由でのファイルのインポートや`css-loader` 経由でCSSをインポートなどの多くの webpack 固有の機能は Node.jsで直接動作しません。
 - Node.jsの最新バージョンはES2015の機能を完全にサポートしていますが、古いブラウザに対応するためにクライアントサイドのコードをトランスパイルする必要があります。これはビルドステップにも再び関係します。
 
 従って基本的な考え方は webpack を使用してクライアントとサーバー両方をバンドルすることです。サーバーバンドルはサーバーによって SSR のために要求され、クライアントバンドルは静的なマークアップのためにブラウザに送信されます。
@@ -53,9 +53,9 @@ server.get('*', (req, res) => {
 
 セットアップの詳細については次のセクションで議論されます。今のところ、ビルドのセットアップが分かっていると仮定すると、webpack を有効にして Vue アプリコードを書くことが可能になっています。
 
-## Webpackによるコード戦略
+## Webpackによるコード構造
 
-webpack を使用してサーバーとクライアントのアプリケーションを処理しているので、ソースコードの大部分はユニバーサルに書かれており、すべての webpack の機能にアクセスできます。 同時に、ユニバーサルなコードを書くときに留意すべき[いくつかのことがあります。](./universal.md)
+webpack を使用してサーバーとクライアントのアプリケーションを処理しているので、ソースコードの大部分はユニバーサルに書かれており、すべての webpack の機能にアクセスできます。 同時に、ユニバーサルなコードを書くときに留意すべき[いくつかあります。](./universal.md)
 
 シンプルなプロジェクトは以下のようになります：
 
@@ -66,9 +66,9 @@ src
 │   ├── Bar.vue
 │   └── Baz.vue
 ├── App.vue
-├── app.js # universal entry
-├── entry-client.js # runs in browser only
-└── entry-server.js # runs on server only
+├── app.js # 共通のエントリ
+├── entry-client.js # ブラウザでのみ実行されます
+└── entry-server.js # サーバでのみ実行されます
 ```
 
 ### `app.js `
@@ -78,11 +78,11 @@ src
 ```js
 import Vue from 'vue'
 import App from './App.vue'
-// export a factory function for creating fresh app, router and store
-// instances
+// 新しいアプリケーション・ルータ・ストアを作成するためのファクトリ関数をエクスポートします
+// インスタンス
 export function createApp () {
   const app = new Vue({
-    // the root instance simply renders the App component.
+    // ルートインスタンスは単にAppコンポーネントをレンダリングします
     render: h => h(App)
   })
   return { app }
@@ -95,15 +95,15 @@ export function createApp () {
 
 ```js
 import { createApp } from './app'
-// client-specific bootstrapping logic...
+// クライアント固有の初期化ロジック
 const { app } = createApp()
-// this assumes App.vue template root element has id="app"
+// これは App.vue テンプレートのルート要素が id="app" だからです。
 app.$mount('#app')
 ```
 
 ### `entry-server.js`:
 
-サーバーエントリはレンダリングごとに繰り返し呼び出すことができる関数をデフォルトでエクスポートします。現時点では、アプリケーションインスタンスを作成して返す以外のことはほとんど行いませんが、後でサーバーサイドのルートマッチングとデータプリフェッチロジックを実行します。The server entry uses a default export which is a function that can be called repeatedly for each render. At this moment, it doesn't do much other than creating and returning the app instance - but later when we will perform server-side route matching and data pre-fetching logic here.
+サーバーエントリはレンダリングごとに繰り返し呼び出すことができる関数をデフォルトでエクスポートします。現時点では、アプリケーションインスタンスを作成して返す以外のことはほとんど行いませんが、後でサーバーサイドのルートマッチングとデータプリフェッチロジックを実行します。
 
 ```js
 import { createApp } from './app'
