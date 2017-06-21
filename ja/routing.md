@@ -48,13 +48,13 @@ export function createApp () {
 import { createApp } from './app'
 export default context => {
   // 非同期のルートフックまたはコンポーネントが存在する可能性があるため、
-  // プロミスを返却します。
-  // そのため、サーバーはレンダリングの前に準備ができるまで待つことができます。
+  // レンダリングする前にすべての準備が整うまでサーバーが待機できるように
+  // プロミスを返します。
   return new Promise((resolve, reject) => {
     const { app, router } = createApp()
     // サーバーサイドのルーターの場所を設定します
     router.push(context.url)
-    // ルーターが非同期コンポーネントとフックを解決するまで待ちます
+    // ルーターが非同期コンポーネントとフックを解決するまで待機します
     router.onReady(() => {
       const matchedComponents = router.getMatchedComponents()
       // 一致するルートがない場合、404で拒否します
