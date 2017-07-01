@@ -3,7 +3,7 @@
 - [ソースコードの構造](structure.md)
 - [ルーティングとコード分割](routing.md)
 - [データのプリフェッチとステート](data.md)
-- [クライアントサイドのハイドレーション](hydration.md)
+- [クライアントサイドでのハイドレーション](hydration.md)
 - [バンドルレンダラの紹介](bundle-renderer.md)
 - [ビルド設定](build-config.md)
 - [CSS の管理](css.md)
